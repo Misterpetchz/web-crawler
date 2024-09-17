@@ -1,0 +1,14 @@
+services:
+  app:
+    container_name: web-crawler
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - '5000:5000'
+    networks:
+      - tunnel
+
+networks:
+  tunnel:
+    driver: bridge
