@@ -20,7 +20,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-##!Run flask
+##Run flask
 ```bash
 python ./app/app.py
 ```
