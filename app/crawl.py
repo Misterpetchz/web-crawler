@@ -29,11 +29,10 @@ def crawling():
     # print(f"Found {len(items_zip)} items")
     
     for i, (link, item_name) in enumerate(items_zip):
-        # print(f"Processing item {i+1}/{len(items_zip)}: {item_name}")
+        print(f"Processing item {i+1}/{len(items_zip)}: {item_name}")
         item_url = f"{base_path}{link}"
         item_name = html.unescape(item_name)
         item_data = crawl_item_page(item_url, item_name, base_path)
-        print(f"Processing item {i+1}/{len(items_zip)}: {item_name}, {item_data['image_url']}")
         items_data.append(item_data)
     
     return items_data
