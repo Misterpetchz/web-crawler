@@ -1,62 +1,113 @@
 import re
 import requests
-from bs4 import BeautifulSoup
 
-def get_page_content(url):
-    res = requests.get(url)
-    return res.content
+def crawling():
+    base_path = "https://minecraft.wiki"
+    start_path = "/w/Item"
+    items_data = []
 
-def extract_items(content):
-    soup = BeautifulSoup(content, 'html.parser')
-    items = set()
-
-    main_content = soup.find('div', class_='mw-parser-output')
-    if main_content:
-        links = main_content.find_all('a')
-        for link in links:
-            href = link.get('href')
-            if href and href.startswith('/wiki/'):
-                item_name = link.text.strip()
-                # ! Change this regular expression
-                # Use regex to filter out non-item links, allowing for more diverse item names
-                if re.match(r'^[A-Z][a-z]+( [A-Za-z0-9\'\-]+)*$', item_name):
-                    items.add(item_name)
+    # print(f"Fetching main page: {base_path}{start_path}")
+    resp = requests.get(f"{base_path}{start_path}")
+    if not resp.ok:
+        # print(f"Failed to fetch main page. Status code: {resp.status_code}")
+        return []
     
-    return items
+    resp_text = resp.text
+    # print(f"Main page fetched. Content length: {len(resp_text)}")
+    
+    scope_data = re.search(r'<span class="mw-headline" id="List_of_items">(.*?)<span class="mw-headline" id="Video">', resp_text, re.DOTALL)
+    if scope_data:
+        scope_data = scope_data.group(0)
+        # print(f"Found 'List of items' section. Length: {len(scope_data)}")
+    else:
+        # print("Couldn't find the 'List of items' section")
+        return []
 
-def crawl(start_url, max_depth=2):
-    visited = set()
-    all_items = set()
-    to_visit = [(start_url, 0)]
+    items_zip = re.findall(r'href="([^"]+)" title="(.*?)"', scope_data)
+    # print(f"Found {len(items_zip)} items")
+    
+    for i, (link, item_name) in enumerate(items_zip):
+        print(f"Processing item {i+1}/{len(items_zip)}: {item_name}")
+        item_url = f"{base_path}{link}"
+        item_data = crawl_item_page(item_url, item_name)
+        items_data.append(item_data)
+    
+    return items_data
 
-    while to_visit:
-        url, depth = to_visit.pop(0)
-        if url in visited or depth > max_depth:
-            continue
+def crawl_item_page(url, item_name):
+    resp = requests.get(url)
+    if not resp.ok:
+        return {"name": item_name, "error": "Page not found"}
+    
+    resp_text = resp.text
+    
+    # Check if the item is a variant (like Acacia Boat)
+    if '#' in url:
+        section_id = url.split('#')[-1]
+        print(f"  Item is a variant. Section ID: {section_id}")
+        section_pattern = fr'<span class="mw-headline" id="{re.escape(section_id)}">(.*?)<h[1-6]'
+        section_match = re.search(section_pattern, resp_text, re.DOTALL)
+        if section_match:
+            resp_text = section_match.group(1)
+            print(f"  Found variant section. Length: {len(resp_text)}")
+        else:
+            print(f"  Couldn't find variant section for {section_id}")
+    
+    # Extract image URL
+    # image_match = re.search(r'<img[^>]*src="([^"]*)"[^>]*alt="[^"]*' + re.escape(item_name), resp_text)
+    # image_url = image_match.group(1) if image_match else "No image found"
+    image_url = extract_image_url(resp_text, item_name, 'https://minecraft.wiki')
+    
+    # Extract other information
+    rarity = extract_info(resp_text, "Rarity tier")
+    renewable = extract_info(resp_text, "Renewable")
+    stackable = extract_info(resp_text, "Stackable")
 
-        print(f'Crawling: {url}')
-        content = get_page_content(url)
-        # print(content)
-        items = extract_items(content)
-        all_items.update(items)
-        visited.add(url)
+    print(f"  Extracted data for {item_name}: Image: {'Found' if image_url != 'No image found' else 'Not found'}, "
+          f"Rarity: {rarity}, Renewable: {renewable}, Stackable: {stackable}")
 
-        if depth < max_depth:
-            soup = BeautifulSoup(content, 'html.parser')
-            links = soup.find_all('a', href=re.compile(r'^/wiki/'))
-            print(links)
-            for link in links:
-                new_url = f"https://minecraft.wiki{link['href']}"
-                if new_url not in visited:
-                    to_visit.append((new_url, depth + 1))
+    return {
+        "name": item_name,
+        "url": url,
+        "image_url": image_url,
+        "rarity": rarity,
+        "renewable": renewable,
+        "stackable": stackable
+    }
 
-    return all_items
+def extract_image_url(resp_text, item_name, base_url):
+    # Adjusted pattern to capture both 'thumb' and non-'thumb' URLs
+    pattern = fr'<img[^>]*src="({re.escape(base_url)}/images/[^"]*)"[^>]*alt="[^"]*{re.escape(item_name)}[^"]*"'
+    
+    # Search for the image tag in the HTML
+    image_match = re.search(pattern, resp_text, re.IGNORECASE)
+    
+    # Return the extracted URL if found, else return "No image found"
+    return image_match.group(1) if image_match else "No image found"
 
-# Updated start URL
-start_url = 'https://minecraft.wiki/w/Item'
-minecraft_items = crawl(start_url)
+def extract_info(content, label):
+    # Patterns for matching <th> or <td> with the given label, followed by the correct <td> or <p> with the value
+    patterns = [
+        fr'<th[^>]*>\s*(?:<a[^>]*>)?\s*{re.escape(label)}\s*(?:</a>)?\s*</th>\s*<td[^>]*>(.*?)</td>',
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, content, re.DOTALL | re.IGNORECASE)
+        if match:
+            # Clean the extracted value by removing any remaining HTML tags
+            return re.sub('<.*?>', '', match.group(1)).strip()
+    
+    return "Not specified"
 
-print(f'Total items found: {len(minecraft_items)}')
-print('Sample items:')
-for item in list(minecraft_items)[:10]:
-    print(item)
+if __name__ == "__main__":
+    print("Starting the crawler...")
+    items = crawling()
+    print(f"\nCrawling complete. Found {len(items)} items.")
+    for item in items:
+        print(f"\nItem: {item['name']}")
+        print(f"URL: {item['url']}")
+        print(f"Image URL: {item['image_url']}")
+        print(f"Rarity: {item['rarity']}")
+        print(f"Renewable: {item['renewable']}")
+        print(f"Stackable: {item['stackable']}")
+        print("---")
