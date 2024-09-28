@@ -1,5 +1,7 @@
 import re
 import requests
+import html
+import urllib.parse
 
 def crawling():
     base_path = "https://minecraft.wiki"
@@ -23,18 +25,20 @@ def crawling():
         # print("Couldn't find the 'List of items' section")
         return []
 
-    items_zip = re.findall(r'href="([^"]+)".*?class="sprite-text">(.*?)</span>', scope_data)
+    items_zip = re.findall(r'href="([^"]+)" title="([^"]+)".*?class="sprite-text">.*?</span></a>', scope_data)
     # print(f"Found {len(items_zip)} items")
     
     for i, (link, item_name) in enumerate(items_zip):
-        print(f"Processing item {i+1}/{len(items_zip)}: {item_name}")
+        # print(f"Processing item {i+1}/{len(items_zip)}: {item_name}")
         item_url = f"{base_path}{link}"
-        item_data = crawl_item_page(item_url, item_name)
+        item_name = html.unescape(item_name)
+        item_data = crawl_item_page(item_url, item_name, base_path)
+        print(f"Processing item {i+1}/{len(items_zip)}: {item_name}, {item_data['image_url']}")
         items_data.append(item_data)
     
     return items_data
 
-def crawl_item_page(url, item_name):
+def crawl_item_page(url, item_name, base_path):
     resp = requests.get(url)
     if not resp.ok:
         return {"name": item_name, "error": "Page not found"}
@@ -44,7 +48,8 @@ def crawl_item_page(url, item_name):
     # Extract image URL
     image_match = re.search(r'<img[^"]+src="([^"]*)"[^>]*alt="[^"]*' + re.escape(item_name), resp_text)
     image_url = image_match.group(1) if image_match else "No image found"
-    image_url = extract_image_url(resp_text, item_name, 'https://minecraft.wiki')
+    image_url = extract_image_url(resp_text, item_name)
+    image_url = base_path + image_url
     
     # Extract other information
     rarity = extract_info(resp_text, "Rarity tier")
@@ -63,10 +68,11 @@ def crawl_item_page(url, item_name):
         "stackable": stackable
     }
 
-def extract_image_url(resp_text, item_name, base_url):
+def extract_image_url(resp_text, item_name):
     item_name = item_name.replace(' ', '_')
+    item_name = urllib.parse.quote(item_name)
     # Adjusted pattern to capture both 'thumb' and non-'thumb' URLs
-    pattern = fr'<a href="/w/File:{item_name}.*?"mw-file-description".*?<img.*?src="([^"]+)"'
+    pattern = fr'<a href="/w/File:{html.escape(item_name)}.*?"mw-file-description".*?<img.*?src="([^"]+)"'
     
     # Search for the image tag in the HTML
     image_match = re.search(pattern, resp_text, re.IGNORECASE)
