@@ -23,7 +23,7 @@ def crawling():
         # print("Couldn't find the 'List of items' section")
         return []
 
-    items_zip = re.findall(r'href="([^"]+)" title="(.*?)"', scope_data)
+    items_zip = re.findall(r'href="([^"]+)".*?class="sprite-text">(.*?)</span>', scope_data)
     # print(f"Found {len(items_zip)} items")
     
     for i, (link, item_name) in enumerate(items_zip):
@@ -41,21 +41,9 @@ def crawl_item_page(url, item_name):
     
     resp_text = resp.text
     
-    # Check if the item is a variant (like Acacia Boat)
-    if '#' in url:
-        section_id = url.split('#')[-1]
-        print(f"  Item is a variant. Section ID: {section_id}")
-        section_pattern = fr'<span class="mw-headline" id="{re.escape(section_id)}">(.*?)<h[1-6]'
-        section_match = re.search(section_pattern, resp_text, re.DOTALL)
-        if section_match:
-            resp_text = section_match.group(1)
-            print(f"  Found variant section. Length: {len(resp_text)}")
-        else:
-            print(f"  Couldn't find variant section for {section_id}")
-    
     # Extract image URL
-    # image_match = re.search(r'<img[^>]*src="([^"]*)"[^>]*alt="[^"]*' + re.escape(item_name), resp_text)
-    # image_url = image_match.group(1) if image_match else "No image found"
+    image_match = re.search(r'<img[^"]+src="([^"]*)"[^>]*alt="[^"]*' + re.escape(item_name), resp_text)
+    image_url = image_match.group(1) if image_match else "No image found"
     image_url = extract_image_url(resp_text, item_name, 'https://minecraft.wiki')
     
     # Extract other information
@@ -63,8 +51,8 @@ def crawl_item_page(url, item_name):
     renewable = extract_info(resp_text, "Renewable")
     stackable = extract_info(resp_text, "Stackable")
 
-    print(f"  Extracted data for {item_name}: Image: {'Found' if image_url != 'No image found' else 'Not found'}, "
-          f"Rarity: {rarity}, Renewable: {renewable}, Stackable: {stackable}")
+    # print(f"  Extracted data for {item_name}: Image: {'Found' if image_url != 'No image found' else 'Not found'}, "
+    #       f"Rarity: {rarity}, Renewable: {renewable}, Stackable: {stackable}")
 
     return {
         "name": item_name,
@@ -76,8 +64,9 @@ def crawl_item_page(url, item_name):
     }
 
 def extract_image_url(resp_text, item_name, base_url):
+    item_name = item_name.replace(' ', '_')
     # Adjusted pattern to capture both 'thumb' and non-'thumb' URLs
-    pattern = fr'<img[^>]*src="({re.escape(base_url)}/images/[^"]*)"[^>]*alt="[^"]*{re.escape(item_name)}[^"]*"'
+    pattern = fr'<a href="/w/File:{item_name}.*?"mw-file-description".*?<img.*?src="([^"]+)"'
     
     # Search for the image tag in the HTML
     image_match = re.search(pattern, resp_text, re.IGNORECASE)
