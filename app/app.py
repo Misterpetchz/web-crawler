@@ -1,8 +1,9 @@
 import csv
-import io
+import io, jsonify
 
 from crawl import crawling  # Import your crawler function
 from flask import Flask, render_template, request, send_file
+
 
 app = Flask(__name__)
 
@@ -29,6 +30,12 @@ def download_csv():
         download_name="items.csv",
         as_attachment=True,
     )
+
+
+@app.route('/start-crawl', methods=['POST'])
+def start_crawl():
+    items = crawling()
+    return jsonify(items)
 
 
 if __name__ == "__main__":
