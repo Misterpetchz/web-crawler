@@ -1,9 +1,6 @@
-import csv
-import io, jsonify
-
+from flask import Flask, render_template, request, send_file, jsonify
+import csv,io
 from crawl import crawling  # Import your crawler function
-from flask import Flask, render_template, request, send_file
-
 
 app = Flask(__name__)
 

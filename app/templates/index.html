@@ -3,6 +3,9 @@
     <h1>Minecraft Crawler</h1>
     <button type="button" id="crawlButton">Start Crawling</button>
     <div id="loading" style="display: none;">Crawling in progress...</div>
+    <div id="downloadBtn" style="display: none;">
+        <a href="/download">Download Item Lists</a>
+    </div>
     <div class="item-list" id="itemList"></div>
     <script>
         document.getElementById('crawlButton').addEventListener('click', function() {
@@ -20,6 +23,7 @@
             .then(items => {
                 // Hide loading message
                 document.getElementById('loading').style.display = 'none';
+                document.getElementById('downloadBtn').style.display = 'block';
 
                 // Get the container for the item list
                 const itemList = document.getElementById('itemList');
