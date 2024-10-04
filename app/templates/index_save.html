@@ -25,12 +25,30 @@
             .then(items => {
                 // Hide loading message
                 document.getElementById('loading').style.display = 'none';
-
+                function goToallitems() {
+                     window.location.href = "all_items.html"; 
+                }
                 window.location.href = "/all-items";
                 document.getElementById('downloadBtn').style.display = 'block';
 
                 // Get the container for the item list
-                
+                const itemList = document.getElementById('itemList');
+                itemList.innerHTML = ''; // Clear any existing items
+
+                // Iterate over each item and create HTML to display it
+                items.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'item';
+                    itemDiv.innerHTML = `
+                        <h2>${item.name}</h2>
+                        <p><strong>URL:</strong> <a href="${item.url}">${item.url}</a></p>
+                        <p><strong>Rarity:</strong> ${item.rarity}</p>
+                        <p><strong>Renewable:</strong> ${item.renewable}</p>
+                        <p><strong>Stackable:</strong> ${item.stackable}</p>
+                        <img src="${item.image_url}" alt="${item.name}">
+                    `;
+                    itemList.appendChild(itemDiv);
+                });
             })
             .catch(error => {
                 console.error('Error:', error);

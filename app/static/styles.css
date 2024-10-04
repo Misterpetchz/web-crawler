@@ -1,0 +1,15 @@
+@font-face {
+    font-family: 'Minecraftia';
+    src: url('./font/minecraftia/Minecraftia.ttf') format('truetype'); /* Using the TTF file */
+    /* Add other formats if available for better browser compatibility */
+    font-weight: normal;
+    font-style: normal;
+}
+
+h1 {
+    font-family: 'Minecraftia', sans-serif;        
+    font-size: 3em;
+    color: rgb(112, 20, 20);
+    text-align: center;
+    margin-top: 50px;
+}
