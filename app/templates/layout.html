@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body background="https://images2.alphacoders.com/285/thumb-1920-285390.jpg">
-    <div class="homepage">
+    <!-- <div class="homepage">
         <div class="container">
             <h1>MINECRAFT ITEM LISTS</h1>
             <p class="description">MinecraftItemList is a web crawler for tool projects</p>
@@ -19,7 +19,8 @@
         </div>
         
         <p>MinecraftItemList &copy; 2024<br>Mojang does not approve or sponsor this project.</p>
-        
-    </div>
+    </div> -->
+    {% block content %}
+    {% endblock %}
 </body>
 </html>
