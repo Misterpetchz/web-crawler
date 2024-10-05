@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'Minecraftia';
-    src: url('./font/minecraftia/Minecraftia.ttf') format('truetype'); /* Using the TTF file */
+    src: url('../font/minecraftia/Minecraftia.ttf') format('truetype'); /* Using the TTF file */
     /* Add other formats if available for better browser compatibility */
     font-weight: normal;
     font-style: normal;
