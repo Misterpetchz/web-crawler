@@ -10,6 +10,9 @@ session={}
 def home():
     return render_template("index.html")
 
+@app.route('/credits')
+def credits():
+    return render_template('credits.html')
 
 @app.route("/download")
 def download_csv():
