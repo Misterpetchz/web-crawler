@@ -6,8 +6,20 @@
     <title>⛏️Minecraft Crawler⛏️</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
-    {% block content %}
-    {% endblock %}
+<body background="https://images2.alphacoders.com/285/thumb-1920-285390.jpg">
+    <div class="homepage">
+        <div class="container">
+            <h1>MINECRAFT ITEM LISTS</h1>
+            <p class="description">MinecraftItemList is a web crawler for tool projects</p>
+            <form>
+                <input type="text" placeholder="Enter your item name" class="item-input">
+                <button type="submit" class="search-btn">Click For Search</button>
+            </form>
+            <button class="credits-btn">Credits</button>
+        </div>
+        
+        <p>MinecraftItemList &copy; 2024<br>Mojang does not approve or sponsor this project.</p>
+        
+    </div>
 </body>
 </html>
