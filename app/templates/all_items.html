@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Items</title>
+    <div id="downloadBtn" style="display: none;">
+        <a href="/download">Download Item Lists</a>
+    </div>
+
+
+    <button onclick="backtofirstpage()">Back</button>
+
+
     <link rel="stylesheet" href="../static/styles.css"> <!-- Link to your CSS file -->
     <style>
         .item-list {
@@ -29,10 +37,17 @@
     <div class="item-list" id="itemList"></div>
 
     <script>
+            function backtofirstpage() {
+                window.location.href = "/";
+        }
         // Fetch the crawled data from the backend
+
+        
+
         fetch('/get-crawled-items')
             .then(response => response.json())
             .then(items => {
+                document.getElementById('downloadBtn').style.display = 'block';
                 // Get the container for the item list
                 const itemList = document.getElementById('itemList');
                 itemList.innerHTML = ''; // Clear any existing items
@@ -56,5 +71,6 @@
                 console.error('Error fetching items:', error);
             });
     </script>
+    
 </body>
 </html>
