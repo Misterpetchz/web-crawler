@@ -5,8 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⛏️Minecraft Crawler⛏️</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .member_title{
+            margin: 0;
+            font-size: 55px;
+            font-weight: 400;
+            font-family: Minecraft;
+            padding-top: 10px;
+        }
+        .back{
+            flex:3;
+            display: flex;
+            justify-content: flex-start;
+            align-items: self-start;
+            padding:10px
+        }
+        .back button{
+            font-family: Minecraftia;
+            font-size: 36px;
+            font-weight: 400;
+            background: none; 
+            border: none; 
+            color: white;
+            text-shadow: 2px 2px #00000078;
+        }
+        .layout_title{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 15px;
+            
+        }
+        .form-row{
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .form-row p {
+            flex-basis: 48%; 
+            margin: 0; 
+            margin-left: 5%;
+            margin-right: -12%;
+            font-size: 48px;
+        }
+        .name{
+            text-align: start;
+        }
+        .id{
+            text-align: center;
+        }
+    </style>
 </head>
-<body background="https://images2.alphacoders.com/285/thumb-1920-285390.jpg">
+
+<body background="https://zh.minecraft.wiki/images/Dirt_background_BE2.png?18838">
+    <script>
+        function backtofirstpage() {
+                window.location.href = "/";
+        }
+    </script>
+    <div style="display: block;">
+        <div class="back"><button onclick="backtofirstpage()">&lt;&lt; Back</button></div>
+    </div>
+    
+
     {% block content %}
     {% endblock %}
 </body>

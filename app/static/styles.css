@@ -43,6 +43,13 @@ body {
     color: white;
 }
 
+.member_container{
+    border-radius: 10px;
+    background: rgba(171, 167, 167, 0.50);
+    margin-left: 150px;
+    margin-right: 150px;
+}
+
 .container {
    
     /* background-color: rgba(0, 0, 0, 0.7);
