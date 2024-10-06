@@ -52,7 +52,7 @@ def all_items():
 def get_crawled_items():
 #     items = session.get('crawled_items',[])  # Retrieve the crawled items from the session {old code}
     items = [i for i in session.get('crawled_items') if i['image_url']!='https://minecraft.wikiNo image found']  #new code
-    print(items)
+#     print(items)
     return jsonify(items)
 
 
