@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, send_file, jsonify
 import csv,io
-from crawl import crawling  # Import your crawler function
+from crawl import crawling, crawled_data  # Import your crawler function
 
 
 app = Flask(__name__)
@@ -16,7 +16,7 @@ def credits():
 
 @app.route("/download")
 def download_csv():
-    items = crawling()
+    items = crawled_data
 
     output = io.StringIO()
     writer = csv.writer(output)

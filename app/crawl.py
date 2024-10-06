@@ -3,7 +3,10 @@ import requests
 import html
 import urllib.parse
 
+crawled_data = []
+
 def crawling():
+    global crawled_data
     base_path = "https://minecraft.wiki"
     start_path = "/w/Item"
     items_data = []
@@ -33,8 +36,9 @@ def crawling():
         item_url = f"{base_path}{link}"
         item_name = html.unescape(item_name)
         item_data = crawl_item_page(item_url, item_name, base_path)
+        crawled_data.append(item_data)
         items_data.append(item_data)
-    
+
     return items_data
 
 def crawl_item_page(url, item_name, base_path):
