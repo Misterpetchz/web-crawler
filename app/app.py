@@ -50,10 +50,18 @@ def all_items():
 
 @app.route('/get-crawled-items', methods=['GET'])
 def get_crawled_items():
-#     items = session.get('crawled_items',[])  # Retrieve the crawled items from the session {old code}
-    items = [i for i in session.get('crawled_items') if i['image_url']!='https://minecraft.wikiNo image found']  #new code
-#     print(items)
-    return jsonify(items)
+    items = session.get('crawled_items', [])
+    filtered_items = []
+
+    for item in items:
+        try:
+            if item['image_url'] != 'https://minecraft.wikiNo image found':
+                filtered_items.append(item)
+        except KeyError:
+            # Handle the case where 'image_url' is missing
+            print(f"Item missing 'image_url': {item}")  # Optional: Log the item for debugging
+
+    return jsonify(filtered_items)
 
 
 if __name__ == "__main__":
