@@ -3,27 +3,77 @@
     <div class="container">
         <h1>MINECRAFT ITEM LISTS</h1>
         <p class="description">MinecraftItemList is a web crawler for Toc project</p>
-        <form class = "action">
+        <form class="action">
             <input type="text" placeholder="Enter your item name" class="item-input">
             <button class="search-btn" type="button" id="crawlButton">Click For Search</button>
-            <button class="credits-btn" type="button" id = "seeCredit">Credits</button>
+            <button class="credits-btn" type="button" id="seeCredit">Credits</button>
         </form>
         <p class="footer">MinecraftItemList &copy; 2024<br>Mojang does not approve or sponsor this project.</p>
     </div>
-    
-    <div id="loading" style="display: none;">Crawling in progress...</div>
+
+    <!-- Loading screen with spinner -->
+    <div id="loading-container" style="display: none;">
+        <div id="loading">
+            <div class="spinner"></div><br><br><br>
+            <p>Crawling in progress...</p>
+        </div>
+    </div>
+
     <div id="downloadBtn" style="display: none;">
         <a href="/download">Download Item Lists</a>
     </div>
     <div class="item-list" id="itemList"></div>
-    
-    
-    <script>
-        document.getElementById('crawlButton').addEventListener('click', function() {
-            // Show loading message
-            document.getElementById('loading').style.display = 'block';
 
-            // Send AJAX request to trigger the crawl
+    <!-- CSS for spinner and loading screen -->
+    <style>
+        /* Center the loading message and spinner */
+        #loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100%;
+            background-color: rgba(22, 20, 20, 0.8); /* Semi-transparent background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; /* Ensure it appears above other content */
+        }
+
+        #loading {
+            text-align: center;
+            position: relative;
+        }
+
+        /* Spinner styles */
+        .spinner {
+            border: 8px solid #f3f3f3; /* Light gray */
+            border-top: 8px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+            position: absolute;
+            left: 37%;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <!-- JavaScript for button actions -->
+    <script>
+        // Function to handle the crawl action
+        const handleCrawl = () => {
+            // Show loading screen
+            const loadingContainer = document.getElementById('loading-container');
+            const loadingText = document.getElementById('loadingText');
+            loadingContainer.style.display = 'flex'; // Show the loading overlay with the spinner
+
+             // Send AJAX request to trigger the crawl
             fetch('/start-crawl', {
                 method: 'POST',
                 headers: {
@@ -31,24 +81,24 @@
                 }
             })
             .then(response => response.json())
-            .then(items => {
-                // Hide loading message
-                document.getElementById('loading').style.display = 'none';
-
+            .then(() => {
+                // Hide loading screen and redirect to the item list
+                loadingContainer.style.display = 'none';
                 window.location.href = "/all-items";
                 document.getElementById('downloadBtn').style.display = 'block';
-
-                // Get the container for the item list
-                
             })
             .catch(error => {
                 console.error('Error:', error);
-                document.getElementById('loading').style.display = 'none';
+                loadingContainer.style.display = 'none';
             });
-        });
-        document.getElementById('seeCredit').addEventListener('click', function() {
-            window.location.href = '/credits'; // Redirect to the credits page
-        });
 
+        };
+
+        // Function to handle credits redirection
+        const handleSeeCredit = () => window.location.href = '/credits';
+
+        // Add event listeners
+        document.getElementById('crawlButton').addEventListener('click', handleCrawl);
+        document.getElementById('seeCredit').addEventListener('click', handleSeeCredit);
     </script>
 {% endblock %}
