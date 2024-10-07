@@ -10,6 +10,7 @@ def crawling():
     base_path = "https://minecraft.wiki"
     start_path = "/w/Item"
     items_data = []
+    crawled_data = []
 
     # print(f"Fetching main page: {base_path}{start_path}")
     resp = requests.get(f"{base_path}{start_path}")
