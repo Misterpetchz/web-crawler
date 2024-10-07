@@ -2,8 +2,11 @@ import re
 import requests
 import html
 import urllib.parse
+import time
+crawled_data = []
 
 def crawling():
+    global crawled_data
     base_path = "https://minecraft.wiki"
     start_path = "/w/Item"
     items_data = []
@@ -33,39 +36,52 @@ def crawling():
         item_url = f"{base_path}{link}"
         item_name = html.unescape(item_name)
         item_data = crawl_item_page(item_url, item_name, base_path)
+        crawled_data.append(item_data)
         items_data.append(item_data)
-    
+
     return items_data
 
 def crawl_item_page(url, item_name, base_path):
-    resp = requests.get(url)
-    if not resp.ok:
-        return {"name": item_name, "error": "Page not found"}
-    
-    resp_text = resp.text
-    
-    # Extract image URL
-    image_match = re.search(r'<img[^"]+src="([^"]*)"[^>]*alt="[^"]*' + re.escape(item_name), resp_text)
-    image_url = image_match.group(1) if image_match else "No image found"
-    image_url = extract_image_url(resp_text, item_name)
-    image_url = base_path + image_url
-    
-    # Extract other information
-    rarity = extract_info(resp_text, "Rarity tier")
-    renewable = extract_info(resp_text, "Renewable")
-    stackable = extract_info(resp_text, "Stackable")
+    max_retries = 5
+    retries = 0
 
-    # print(f"  Extracted data for {item_name}: Image: {'Found' if image_url != 'No image found' else 'Not found'}, "
-    #       f"Rarity: {rarity}, Renewable: {renewable}, Stackable: {stackable}")
+    while retries < max_retries:
+        resp = requests.get(url)
 
-    return {
-        "name": item_name,
-        "url": url,
-        "image_url": image_url,
-        "rarity": rarity,
-        "renewable": renewable,
-        "stackable": stackable
-    }
+        if resp.status_code == 200:
+            resp_text = resp.text
+            
+            # Extract image URL
+            image_url = extract_image_url(resp_text, item_name)
+            if image_url:
+                image_url = base_path + image_url
+            else:
+                image_url = "No image found"
+
+            # Extract other information
+            rarity = extract_info(resp_text, "Rarity tier")
+            renewable = extract_info(resp_text, "Renewable")
+            stackable = extract_info(resp_text, "Stackable")
+
+            return {
+                "name": item_name,
+                "url": url,
+                "image_url": image_url,
+                "rarity": rarity,
+                "renewable": renewable,
+                "stackable": stackable
+            }
+
+        elif resp.status_code == 429:
+            wait_time = int(resp.headers.get("Retry-After", 1))
+            print(f"Rate limit exceeded. Waiting for {wait_time} seconds before retrying.")
+            time.sleep(wait_time)
+            retries += 1
+
+        else:
+            return {"name": item_name, "error": f"Error {resp.status_code}: {resp.reason}"}
+
+    return {"name": item_name, "error": "Max retries exceeded"}
 
 def extract_image_url(resp_text, item_name):
     item_name = item_name.replace(' ', '_')
